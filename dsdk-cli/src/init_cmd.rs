@@ -675,7 +675,12 @@ fn resolve_extends_chain_from_source_inner(
     if !is_primary {
         if let Some(copy_files) = &mut derived.copy_files {
             let ancestor_dir = config_path.parent().unwrap_or_else(|| Path::new("."));
-            resolve_local_copy_file_sources(copy_files, ancestor_dir);
+            // The rewritten paths are later tested with `is_absolute()` by
+            // process_copy_files; a relative `--source .` would otherwise
+            // leave them relative and re-rooted under the primary target.
+            let ancestor_dir =
+                std::path::absolute(ancestor_dir).unwrap_or_else(|_| ancestor_dir.to_path_buf());
+            resolve_local_copy_file_sources(copy_files, &ancestor_dir);
         }
     }
 
