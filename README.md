@@ -247,6 +247,37 @@ cim init -t optee-qemu-v8
 
 Creates workspace at `$HOME/dsdk-optee-qemu-v8`. Use `-w` or `--workspace` to specify a different location.
 
+By default CIM expects `targets/<target>/sdk.yml`. Projects that use `targets/`
+for something else, or have their own layout, can keep manifests anywhere by
+adding a `.cim.yml` at the repository root. It replaces the `targets/` lookup:
+
+```yaml
+# directory globs, like Cargo workspace members: every matched directory
+# holding an sdk.yml is a target named after the directory
+members: ["boards/*", "tools/*"]
+
+# explicit entries (optional, can be combined with members)
+targets:
+  docs: tools/documentation/sdk.yml
+```
+
+```yaml
+# or a single manifest (named by `name:`, else the repository name)
+manifest: cim/sdk.yml
+name: project
+```
+
+```bash
+cim list-targets -s https://github.com/org/project.git
+cim init -t stm32f4 -s https://github.com/org/project.git
+```
+
+`-M`/`--manifest-path` (relative to the repository root) overrides `.cim.yml`.
+Without either, CIM falls back to `targets/<target>/sdk.yml` (the same as
+`members: ["targets/*"]`). Duplicate target names are an error. Versions
+(`cim list-targets -t NAME`) are still branches/tags named `<name>-*`, and an
+`extends:` base is looked up the same way as any other target.
+
 ### Build and Test
 
 ```bash
