@@ -11,6 +11,7 @@
 
 mod bootstrap_cmd;
 mod cli;
+mod env_cmd;
 mod init_cmd;
 mod install_cmd;
 mod makefile;
@@ -158,6 +159,12 @@ fn main() {
                 verbose: *verbose,
                 _cert_validation: cert_validation.as_deref(),
             });
+        }
+        Commands::Env => {
+            if let Err(e) = env_cmd::handle_env_command() {
+                messages::error(&format!("Cannot export workspace variables: {e}"));
+                std::process::exit(1);
+            }
         }
         Commands::Makefile {
             no_dividers,
