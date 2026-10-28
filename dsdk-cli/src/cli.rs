@@ -210,6 +210,12 @@ pub enum Commands {
         #[arg(short = 'G', long, value_name = "NAMES")]
         exclude_group: Option<String>,
     },
+    /// Print resolved workspace variables as POSIX shell exports
+    ///
+    /// Run inside a workspace. Outputs shell code for sh, bash or zsh;
+    /// does not modify the parent shell. Existing environment values override
+    /// explicitly declared manifest defaults, except the reserved WORKSPACE.
+    Env,
     /// Generate a Makefile from the manifest
     Makefile {
         /// Omit section dividers in the Makefile

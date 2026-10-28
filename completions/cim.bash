@@ -27,6 +27,7 @@
 #   - update: --no-mirror (-N), --mirror (-m), --match (-p), --include-group (-g),
 #             --exclude-group (-G), --all (-a), --verbose, --cert-validation (-c)
 #   - foreach: command, --match (-p), --include-group (-g), --exclude-group (-G)
+#   - env: (no options)
 #   - makefile: --no-dividers (-d), --include-group (-g), --exclude-group (-G),
 #               --no-includes
 #   - add: --name (-n), --url (-u), --commit (-c)
@@ -59,7 +60,7 @@ _cim_completions() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Main commands
-    local main_commands="list-targets init bootstrap update foreach makefile add install docs docker release config utils help"
+    local main_commands="list-targets init bootstrap update foreach env makefile add install docs docker release config utils help"
 
     # Global options
     local global_opts="--help -h --version -v"
@@ -324,6 +325,11 @@ _cim_completions() {
                     return 0
                     ;;
             esac
+            ;;
+
+        env)
+            COMPREPLY=( $(compgen -W "--help -h" -- "${cur}") )
+            return 0
             ;;
 
         makefile)

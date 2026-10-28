@@ -432,6 +432,52 @@ cim update [--match REGEX] [--include-group NAMES] [--exclude-group NAMES]
 - `--include-group NAMES` / `--exclude-group NAMES`: same group filtering
   as `init` (see [Repository Groups](#repository-groups)).
 
+#### env
+
+Print resolved workspace variables as POSIX shell exports, independently of
+Makefiles. Run from the workspace root or any subdirectory:
+
+```sh
+cim env
+```
+
+To load the exports into `sh`, Bash, or Zsh:
+
+```sh
+if sdk_exports="$(cim env)"; then
+    eval "$sdk_exports"
+fi
+unset sdk_exports
+```
+
+The command reads the current `sdk.yml` and local `extends:`/overlay chain:
+
+| Export | Precedence |
+|--------|------------|
+| Explicit `variables:` entries | Existing environment values override defaults, including empty values. |
+| `WORKSPACE` | Detected workspace root; reserved against manifest redefinition. |
+| `<REPO>_DIR`, `<REPO>_VENV` | Explicit manifest entries override generated defaults; otherwise host values are ignored. |
+
+Repository names use the final path component, uppercased with `-` and `.`
+replaced by `_`. Venv variables require `python-deps`. All manifest repositories
+are included regardless of clone/group filters; generated paths need not exist.
+
+Defaults support nested `${{ NAME }}` references, host `$NAME`/`${NAME}`/`%NAME%`
+references, and leading `~/` (`HOME`, falling back to `USERPROFILE`). Use `$$` for
+a literal dollar sign. Host values are inserted literally, without re-expansion.
+Make expressions, command substitution, backticks, and shell parameter operators
+are unsupported.
+
+Output is sorted and shell-quoted. Invalid names, missing references, cycles,
+NUL bytes, or unsupported expressions produce a nonzero exit status, diagnostics
+on stderr, and no exports. No files are written or setup commands executed;
+Python activation and automatic direnv integration are not included.
+
+Only evaluate exports from trusted manifests; they can change `PATH` and contain
+sensitive values. Activation does not undo prior exports: unset variables or use
+a fresh shell to pick up changed manifest defaults. Shell assignment errors
+(such as readonly variables) can leave a partially applied environment.
+
 #### makefile
 
 Generate Makefile from sdk.yml (run from workspace). Emits standard
